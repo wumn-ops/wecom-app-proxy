@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企微模板卡片发送</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #333; padding: 20px; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 22px; margin-bottom: 20px; color: #1a1a1a; }
+.card { background: #fff; border-radius: 8px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.card h2 { font-size: 15px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #eee; color: #555; }
+.form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+.form-row label { width: 90px; flex-shrink: 0; line-height: 34px; text-align: right; font-size: 13px; color: #666; }
+.form-row input, .form-row select, .form-row textarea { flex: 1; padding: 7px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
+.form-row textarea { resize: vertical; min-height: 28px; font-family: monospace; }
+.form-row input:focus, .form-row select:focus, .form-row textarea:focus { outline: none; border-color: #1890ff; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+
+.dynamic-list { margin-bottom: 12px; }
+.dynamic-item { display: flex; gap: 8px; margin-bottom: 6px; align-items: center; }
+.dynamic-item input { flex: 1; padding: 6px 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
+.dynamic-item .btn-sm { flex-shrink: 0; padding: 4px 10px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; }
+.btn-add { background: #e6f7ff; color: #1890ff; padding: 4px 12px; font-size: 12px; border: 1px dashed #1890ff; border-radius: 4px; cursor: pointer; margin-left: 90px; }
+.btn-remove { background: #fff1f0; color: #ff4d4f; }
+
+.btn-row { display: flex; gap: 12px; margin-top: 20px; }
+.btn { padding: 8px 24px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; }
+.btn-primary { background: #1890ff; color: #fff; }
+.btn-primary:hover { background: #40a9ff; }
+.btn-default { background: #fff; color: #333; border: 1px solid #d9d9d9; }
+
+.result { margin-top: 16px; padding: 12px; border-radius: 4px; font-size: 13px; font-family: monospace; display: none; }
+.result.success { background: #f6ffed; border: 1px solid #b7eb8f; display: block; }
+.result.error { background: #fff2f0; border: 1px solid #ffccc7; display: block; }
+
+.type-tabs { display: flex; gap: 0; margin-bottom: 16px; }
+.type-tab { padding: 6px 16px; border: 1px solid #d9d9d9; background: #fff; cursor: pointer; font-size: 13px; }
+.type-tab:first-child { border-radius: 4px 0 0 4px; }
+.type-tab:last-child { border-radius: 0 4px 4px 0; }
+.type-tab.active { background: #1890ff; color: #fff; border-color: #1890ff; }
+.type-tab + .type-tab { border-left: none; }
+
+.section-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; margin-bottom: 8px; }
+.section-toggle span { font-size: 13px; color: #1890ff; }
+.section-body { display: none; padding-left: 12px; border-left: 2px solid #e8e8e8; margin-left: 45px; margin-bottom: 12px; }
+.section-body.show { display: block; }
+
+.help { font-size: 11px; color: #999; margin-left: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>企微模板卡片发送</h1>
+
+<!-- 接收人 -->
+<div class="card">
+  <h2>接收人</h2>
+  <div class="form-row">
+    <label>touser</label>
+    <input id="touser" value="7305" placeholder="用户ID，多个用|分隔">
+  </div>
+</div>
+
+<!-- 卡片类型 -->
+<div class="card">
+  <h2>卡片类型</h2>
+  <div class="type-tabs">
+    <div class="type-tab active" data-type="button_interaction">按钮交互</div>
+    <div class="type-tab" data-type="text_notice">文本通知</div>
+    <div class="type-tab" data-type="news_notice">图文展示</div>
+  </div>
+
+  <!-- 通用字段 -->
+  <div class="form-row">
+    <label>主标题 *</label>
+    <input id="title" value="项目审批通知" placeholder="主标题">
+  </div>
+  <div class="form-row">
+    <label>标题描述</label>
+    <input id="desc" value="您有一个新的项目立项申请需要审批" placeholder="标题下方描述">
+  </div>
+  <div class="form-row">
+    <label>副标题</label>
+    <input id="sub_title" value="请尽快处理，超过24小时将自动驳回" placeholder="副标题文本">
+  </div>
+  <div class="form-row">
+    <label>task_id</label>
+    <input id="task_id" readonly style="background:#f5f5f5;color:#999;" placeholder="自动生成">
+  </div>
+
+  <!-- 横线列表 -->
+  <div style="margin-top:4px;">
+    <div class="section-toggle" onclick="document.getElementById('hcSection').classList.toggle('show')">
+      <span>&#9654; 横向内容列表</span>
+    </div>
+    <div id="hcSection" class="section-body show">
+      <div id="hc-list" class="dynamic-list">
+        <div class="dynamic-item">
+          <input placeholder="字段名" value="申请人" class="hc-key">
+          <input placeholder="值" value="张三" class="hc-val">
+          <button class="btn-sm btn-remove" onclick="this.parentElement.remove()">-</button>
+        </div>
+        <div class="dynamic-item">
+          <input placeholder="字段名" value="项目名称" class="hc-key">
+          <input placeholder="值" value="企业微信集成项目" class="hc-val">
+          <button class="btn-sm btn-remove" onclick="this.parentElement.remove()">-</button>
+        </div>
+        <div class="dynamic-item">
+          <input placeholder="字段名" value="预算金额" class="hc-key">
+          <input placeholder="值" value="500,000 元" class="hc-val">
+          <button class="btn-sm btn-remove" onclick="this.parentElement.remove()">-</button>
+        </div>
+      </div>
+      <button class="btn-add" onclick="addHC()">+ 添加行</button>
+    </div>
+  </div>
+
+  <!-- 按钮列表 -->
+  <div style="margin-top:12px;" id="buttonSection">
+    <div class="section-toggle" onclick="document.getElementById('btnSection').classList.toggle('show')">
+      <span>&#9654; 按钮列表</span>
+    </div>
+    <div id="btnSection" class="section-body show">
+      <div id="btn-list" class="dynamic-list">
+        <div class="dynamic-item">
+          <input placeholder="按钮文字" value="同意" class="btn-text">
+          <select class="btn-type" style="width:100px">
+            <option value="1" selected>跳转URL</option>
+            <option value="0">回调key</option>
+          </select>
+          <input placeholder="URL或key" value="https://doc.weixin.qq.com/smartsheet/s3_AKQAYBR4AEUCNb4J9jXjKQl0gqF48_a?scode=AAkAPQcTAAobNJo8lUAe0AmwYPAHQ&tab=q979lj&viewId=vukaF8" class="btn-val">
+          <select class="btn-style" style="width:80px">
+            <option value="1" selected>蓝色</option>
+            <option value="2">红色</option>
+          </select>
+          <button class="btn-sm btn-remove" onclick="this.parentElement.remove()">-</button>
+        </div>
+        <div class="dynamic-item">
+          <input placeholder="按钮文字" value="驳回" class="btn-text">
+          <select class="btn-type" style="width:100px">
+            <option value="1">跳转URL</option>
+            <option value="0" selected>回调key</option>
+          </select>
+          <input placeholder="URL或key" value="reject" class="btn-val">
+          <select class="btn-style" style="width:80px">
+            <option value="1">蓝色</option>
+            <option value="2" selected>红色</option>
+          </select>
+          <button class="btn-sm btn-remove" onclick="this.parentElement.remove()">-</button>
+        </div>
+      </div>
+      <button class="btn-add" onclick="addButton()">+ 添加按钮</button>
+    </div>
+  </div>
+
+  <!-- 卡片图片 (news_notice) -->
+  <div style="margin-top:12px;" id="imageSection" hidden>
+    <div class="section-toggle" onclick="document.getElementById('imgSection').classList.toggle('show')">
+      <span id="img_label">&#9654; 卡片图片（必填）</span>
+    </div>
+    <div id="imgSection" class="section-body show">
+      <div class="form-row">
+        <label>图片URL</label>
+        <input id="card_image_url" placeholder="https://example.com/image.png">
+      </div>
+    </div>
+  </div>
+
+  <!-- 卡片点击 -->
+  <div style="margin-top:12px;">
+    <div class="section-toggle" onclick="document.getElementById('caSection').classList.toggle('show')">
+      <span id="ca_label">&#9654; 卡片点击跳转</span>
+    </div>
+    <div id="caSection" class="section-body">
+      <div class="form-row">
+        <label>跳转URL</label>
+        <input id="card_action_url" placeholder="留空不跳转" style="width:100%">
+      </div>
+    </div>
+  </div>
+
+  <!-- 强调内容 -->
+  <div style="margin-top:12px;">
+    <div class="section-toggle" onclick="document.getElementById('emSection').classList.toggle('show')">
+      <span>&#9654; 强调内容</span>
+    </div>
+    <div id="emSection" class="section-body">
+      <div class="form-row">
+        <label>标题</label>
+        <input id="em_title" placeholder="强调标题">
+      </div>
+      <div class="form-row">
+        <label>描述</label>
+        <input id="em_desc" placeholder="强调描述">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 操作 -->
+<div class="btn-row">
+  <button class="btn btn-primary" onclick="sendCard()">发送</button>
+  <button class="btn btn-default" onclick="resetForm()">重置</button>
+</div>
+
+<div id="result" class="result"></div>
+</div>
+
+<script>
+// 卡片类型切换
+document.querySelectorAll('.type-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+    const type = this.dataset.type;
+    document.getElementById('buttonSection').style.display = type === 'button_interaction' ? '' : 'none';
+    document.getElementById('imageSection').hidden = type !== 'news_notice';
+    // text_notice / news_notice 必须填 card_action，自动展开
+    const caSection = document.getElementById('caSection');
+    if (type === 'text_notice' || type === 'news_notice') {
+      caSection.classList.add('show');
+      document.getElementById('ca_label').textContent = '▼ 卡片点击跳转（必填）';
+    } else {
+      document.getElementById('ca_label').textContent = '▶ 卡片点击跳转';
+    }
+  });
+});
+
+// 自动生成 task_id
+function genTaskId() {
+  document.getElementById('task_id').value = 'task_' + Date.now();
+}
+genTaskId();
+
+function addHC() {
+  const div = document.createElement('div');
+  div.className = 'dynamic-item';
+  div.innerHTML = '<input placeholder="字段名" class="hc-key"><input placeholder="值" class="hc-val"><button class="btn-sm btn-remove" onclick="this.parentElement.remove()">-</button>';
+  document.getElementById('hc-list').appendChild(div);
+}
+
+function addButton() {
+  const div = document.createElement('div');
+  div.className = 'dynamic-item';
+  div.innerHTML = '<input placeholder="按钮文字" class="btn-text"><select class="btn-type" style="width:100px"><option value="1" selected>跳转URL</option><option value="0">回调key</option></select><input placeholder="URL或key" class="btn-val"><select class="btn-style" style="width:80px"><option value="1" selected>蓝色</option><option value="2">红色</option></select><button class="btn-sm btn-remove" onclick="this.parentElement.remove()">-</button>';
+  document.getElementById('btn-list').appendChild(div);
+}
+
+function resetForm() {
+  document.getElementById('touser').value = '7305';
+  document.getElementById('title').value = '项目审批通知';
+  document.getElementById('desc').value = '您有一个新的项目立项申请需要审批';
+  document.getElementById('sub_title').value = '请尽快处理，超过24小时将自动驳回';
+  genTaskId();
+  document.getElementById('card_action_url').value = '';
+  document.getElementById('em_title').value = '';
+  document.getElementById('em_desc').value = '';
+  document.querySelector('.type-tab[data-type="button_interaction"]').click();
+}
+
+async function sendCard() {
+  const cardType = document.querySelector('.type-tab.active').dataset.type;
+  const resultEl = document.getElementById('result');
+  resultEl.className = 'result';
+  resultEl.textContent = '发送中...';
+  resultEl.style.display = 'block';
+
+  const templateCard = {
+    card_type: cardType,
+    main_title: {
+      title: document.getElementById('title').value || ' ',
+      desc: document.getElementById('desc').value || undefined,
+    },
+    task_id: document.getElementById('task_id').value,
+    sub_title_text: document.getElementById('sub_title').value || undefined,
+  };
+
+  // 横线列表
+  const hcItems = [];
+  document.querySelectorAll('#hc-list .dynamic-item').forEach(item => {
+    const k = item.querySelector('.hc-key').value.trim();
+    const v = item.querySelector('.hc-val').value.trim();
+    if (k) hcItems.push({ keyname: k, value: v });
+  });
+  if (hcItems.length > 0) templateCard.horizontal_content_list = hcItems;
+
+  // 按钮列表 (仅 button_interaction)
+  if (cardType === 'button_interaction') {
+    const buttons = [];
+    document.querySelectorAll('#btn-list .dynamic-item').forEach(item => {
+      const text = item.querySelector('.btn-text').value.trim();
+      const type = parseInt(item.querySelector('.btn-type').value);
+      const val = item.querySelector('.btn-val').value.trim();
+      const style = parseInt(item.querySelector('.btn-style').value);
+      if (text) {
+        const btn = { text, style, type };
+        if (type === 1) btn.url = val;
+        else btn.key = val;
+        buttons.push(btn);
+      }
+    });
+    if (buttons.length > 0) templateCard.button_list = buttons;
+  }
+
+  // 卡片点击（text_notice/news_notice 必填）
+  const caUrl = document.getElementById('card_action_url').value.trim();
+  if (caUrl) {
+    templateCard.card_action = { type: 1, url: caUrl };
+  } else if (cardType === 'text_notice' || cardType === 'news_notice') {
+    templateCard.card_action = { type: 1, url: 'https://work.weixin.qq.com' };
+  }
+
+  // 图文展示需要图片
+  if (cardType === 'news_notice') {
+    const imgUrl = document.getElementById('card_image_url').value.trim();
+    if (imgUrl) {
+      templateCard.card_image = { url: imgUrl, aspect_ratio: 1.6 };
+    }
+  }
+
+  // 强调内容
+  const emTitle = document.getElementById('em_title').value.trim();
+  const emDesc = document.getElementById('em_desc').value.trim();
+  if (emTitle || emDesc) {
+    templateCard.emphasis_content = {};
+    if (emTitle) templateCard.emphasis_content.title = emTitle;
+    if (emDesc) templateCard.emphasis_content.desc = emDesc;
+  }
+
+  const touser = document.getElementById('touser').value.trim();
+  const payload = { touser, template_card: templateCard };
+  console.log('发送的 JSON:', JSON.stringify(payload, null, 2));
+
+  try {
+    const resp = await fetch('/api/v1/messages/template-card', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await resp.json();
+    if (resp.ok && data.errcode === 0) {
+      resultEl.className = 'result success';
+      resultEl.textContent = '发送成功! errcode=' + data.errcode + ' errmsg=' + data.errmsg + ' msgid=' + data.msgid;
+      genTaskId();
+    } else {
+      resultEl.className = 'result error';
+      resultEl.textContent = '发送失败: ' + JSON.stringify(data, null, 2);
+    }
+  } catch (e) {
+    resultEl.className = 'result error';
+    resultEl.textContent = '请求失败: ' + e.message;
+  }
+}
+</script>
+</body>
+</html>

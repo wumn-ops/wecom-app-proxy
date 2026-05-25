@@ -1,0 +1,20 @@
+{
+    "template_card": {
+        "card_type": "button_interaction",
+        "main_title": {
+            "title": "项目审批通知",
+            "desc": "您有一个新的项目立项申请需要审批"
+        },
+        "task_id": "task_20260522_002",
+        "sub_title_text": "请尽快处理，超过24小时将自动驳回",
+        "horizontal_content_list": [
+            {"keyname": "申请人", "value": "张三"},
+            {"keyname": "项目名称", "value": "企业微信集成项目"},
+            {"keyname": "预算金额", "value": "500,000 元"}
+        ],
+        "button_list": [
+            {"text": "同意", "style": 1, "type": 1, "url": "https://doc.weixin.qq.com/smartsheet/s3_AKQAYBR4AEUCNb4J9jXjKQl0gqF48_a?scode=AAkAPQcTAAobNJo8lUAe0AmwYPAHQ&tab=q979lj&viewId=vukaF8"},
+            {"text": "驳回", "style": 2, "key": "reject"}
+        ]
+    }
+}
