@@ -19,5 +19,7 @@ class Settings(BaseSettings):
     wecom_token_refresh_buffer: int = 300
     smartsheet_docid: str = ""
     smartsheet_sheet_id: str = ""
-    smartsheet_status_field: str = "进度-产品经理"
+    smartsheet_field_status: str = "ftQMc5"
+    smartsheet_field_system: str = "fJodHY"
+    smartsheet_field_verify: str = "ft3nIs"
     log_level: str = "INFO"
