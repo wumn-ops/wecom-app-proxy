@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from datetime import datetime, timedelta
 
 from app.models.template_card import SendTemplateCardRequest
@@ -60,12 +61,13 @@ class CronScheduler:
 
     async def _send_reminder(self):
         card = {
-            "card_type": "text_notice",
-            "main_title": {
-                "title": "周度问题统计提醒",
-                "desc": "请查看本周生科生产域问题及需求统计",
-            },
-            "card_action": {"type": 1, "url": self._page_url},
+            "card_type": "button_interaction",
+            "main_title": {"title": "生科生产域问题及需求统计"},
+            "sub_title_text": "请点击下方查看按钮",
+            "task_id": f"reminder_{int(time.time() * 1000)}",
+            "button_list": [
+                {"text": "查看", "style": 1, "type": 1, "url": self._page_url},
+            ],
         }
         req = SendTemplateCardRequest(touser=self._touser, template_card=card)
         resp = await self._client.send_template_card(req, agentid=self._agent_id)
