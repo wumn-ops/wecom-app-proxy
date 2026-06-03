@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Union
 
 from pydantic import BaseModel, Field
 
@@ -205,7 +205,7 @@ class MultipleInteractionCard(BaseModel):
 
 
 TemplateCard = Annotated[
-    TextNoticeCard | NewsNoticeCard | ButtonInteractionCard | VoteInteractionCard | MultipleInteractionCard,
+    Union[TextNoticeCard, NewsNoticeCard, ButtonInteractionCard, VoteInteractionCard, MultipleInteractionCard],
     Field(discriminator="card_type"),
 ]
 
