@@ -55,7 +55,7 @@ def create_app() -> FastAPI:
         if http_client:
             await http_client.aclose()
 
-    app = FastAPI(title="WeCom Message Center", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="WeCom Message Center", version="0.1.0", lifespan=lifespan, redirect_slashes=False)
 
     app.add_middleware(
         CORSMiddleware,
