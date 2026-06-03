@@ -17,4 +17,7 @@ class Settings(BaseSettings):
     wecom_encoding_aes_key: str = ""
     wecom_api_base_url: str = "https://qyapi.weixin.qq.com"
     wecom_token_refresh_buffer: int = 300
+    smartsheet_docid: str = ""
+    smartsheet_sheet_id: str = ""
+    smartsheet_status_field: str = "进度-产品经理"
     log_level: str = "INFO"

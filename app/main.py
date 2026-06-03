@@ -31,6 +31,11 @@ def create_app() -> FastAPI:
         html_path = Path(__file__).resolve().parent.parent / "static" / "index.html"
         return html_path.read_text(encoding="utf-8")
 
+    @app.get("/smartsheet", response_class=HTMLResponse)
+    async def smartsheet_page():
+        html_path = Path(__file__).resolve().parent.parent / "static" / "smartsheet.html"
+        return html_path.read_text(encoding="utf-8")
+
     @app.get("/health")
     async def health():
         return {"status": "ok"}
