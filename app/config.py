@@ -22,4 +22,6 @@ class Settings(BaseSettings):
     smartsheet_field_status: str = "ftQMc5"
     smartsheet_field_system: str = "fJodHY"
     smartsheet_field_verify: str = "ft3nIs"
+    smartsheet_page_url: str = ""
+    cron_schedule: str = ""
     log_level: str = "INFO"

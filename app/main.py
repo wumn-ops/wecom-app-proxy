@@ -1,20 +1,61 @@
 import logging
+from contextlib import asynccontextmanager
 from pathlib import Path
 
+import httpx
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from app.api.v1.callback import router as callback_router
 from app.api.v1.router import router as v1_router
+from app.config import Settings
 from app.core.exceptions import TokenRefreshError, WeComApiError, WeComHttpError
+from app.services.scheduler import CronScheduler
+from app.services.token_manager import TokenManager
+from app.services.wecom_client import WeComClient
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="WeCom Message Center", version="0.1.0")
+    settings = Settings()
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        scheduler = None
+        http_client = None
+        if settings.cron_schedule and settings.wecom_default_touser and settings.smartsheet_page_url:
+            http_client = httpx.AsyncClient(timeout=httpx.Timeout(10.0))
+            token_mgr = TokenManager(
+                corp_id=settings.wecom_corp_id,
+                corp_secret=settings.wecom_corp_secret,
+                http_client=http_client,
+                base_url=settings.wecom_api_base_url,
+                refresh_buffer=settings.wecom_token_refresh_buffer,
+            )
+            client = WeComClient(token_mgr, settings.wecom_api_base_url)
+            scheduler = CronScheduler(
+                cron_expr=settings.cron_schedule,
+                client=client,
+                touser=settings.wecom_default_touser,
+                agent_id=settings.wecom_agent_id,
+                page_url=settings.smartsheet_page_url,
+            )
+            scheduler.start()
+            logger.info("定时任务已启动: %s", settings.cron_schedule)
+        else:
+            logger.info("定时任务未配置（缺少 cron_schedule / touser / page_url）")
+
+        yield
+
+        if scheduler:
+            scheduler.stop()
+        if http_client:
+            await http_client.aclose()
+
+    app = FastAPI(title="WeCom Message Center", version="0.1.0", lifespan=lifespan)
 
     app.add_middleware(
         CORSMiddleware,
